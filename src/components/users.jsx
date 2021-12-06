@@ -15,7 +15,7 @@ const Users = () => {
 					<button
 						className="btn btn-danger"
 						onClick={() => {
-							deleteUser(user._id);
+							handleUserDelete(user._id);
 						}}
 					>
 						Delete
@@ -33,7 +33,7 @@ const Users = () => {
 		));
 	};
 
-	const deleteUser = (userId) => {
+	const handleUserDelete = (userId) => {
 		setUsers((prevState) =>
 			prevState.filter((user) => user._id !== userId)
 		);

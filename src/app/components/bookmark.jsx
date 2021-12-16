@@ -1,4 +1,5 @@
-import React from 'react';
+import React from "react";
+import PropTypes from "prop-types";
 
 const Bookmark = ({ status, ...rest }) => {
 	return (
@@ -8,9 +9,13 @@ const Bookmark = ({ status, ...rest }) => {
 				rest.onToggleBookmark(rest.userId);
 			}}
 		>
-			<i className={`bi bi-bookmark${status ? '-heart-fill' : ''}`}></i>
+			<i className={`bi bi-bookmark${status ? "-heart-fill" : ""}`}></i>
 		</button>
 	);
+};
+
+Bookmark.propTypes = {
+	status: PropTypes.string.isRequired
 };
 
 export default Bookmark;

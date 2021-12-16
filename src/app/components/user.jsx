@@ -1,6 +1,7 @@
-import React from 'react';
-import Quality from './quality';
-import Bookmark from './bookmark';
+import React from "react";
+import Quality from "./quality";
+import Bookmark from "./bookmark";
+import PropTypes from "prop-types";
 
 const User = ({ user, ...rest }) => {
 	const getUserQualities = (user) => {
@@ -19,8 +20,8 @@ const User = ({ user, ...rest }) => {
 			<td>
 				<Bookmark
 					status={user.isBookmarked}
-					onToggleBookmark={rest.onToggleBookmark}
 					userId={user._id}
+					{...rest}
 				/>
 			</td>
 			<td>
@@ -35,6 +36,10 @@ const User = ({ user, ...rest }) => {
 			</td>
 		</tr>
 	);
+};
+
+User.propTypes = {
+	user: PropTypes.object.isRequired
 };
 
 export default User;

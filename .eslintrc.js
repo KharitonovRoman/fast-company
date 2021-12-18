@@ -13,9 +13,9 @@ module.exports = {
 	},
 	plugins: ["react"],
 	rules: {
-		indent: ["error", 4],
-		translate_tabs_to_spaces: false,
-		semi: [2, "always"],
+		indent: ["error", "tab"],
+		"no-tabs": 0,
+		semi: ["error", "always"],
 		"space-before-function-paren": ["error", "never"],
 		quotes: ["error", "double", { allowTemplateLiterals: true }],
 		"multiline-ternary": ["error", "never"]

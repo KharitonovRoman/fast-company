@@ -5,7 +5,7 @@ import User from "./user";
 import PropTypes from "prop-types";
 
 const UserList = ({ users, ...rest }) => {
-	const count = users.length;
+	const userCount = users.length;
 	const pageSize = 4;
 	const [currentPage, setCurrentPage] = useState(1);
 
@@ -17,7 +17,7 @@ const UserList = ({ users, ...rest }) => {
 
 	return (
 		<>
-			{count > 0 && (
+			{userCount > 0 && (
 				<table className="table">
 					<thead>
 						<tr>
@@ -32,19 +32,14 @@ const UserList = ({ users, ...rest }) => {
 					</thead>
 					<tbody>
 						{userCrop.map((user) => (
-							<User
-								key={user._id}
-								user={user}
-								onDelete={rest.onDelete}
-								onToggleBookmark={rest.onToggleBookmark}
-							/>
+							<User key={user._id} user={user} {...rest} />
 						))}
 					</tbody>
 				</table>
 			)}
 
 			<Pagination
-				itemsCount={count}
+				itemsCount={userCount}
 				pageSize={pageSize}
 				onPageChange={handlePageChange}
 				currentPage={currentPage}
@@ -54,7 +49,7 @@ const UserList = ({ users, ...rest }) => {
 };
 
 UserList.propTypes = {
-	users: PropTypes.array.isRequired
+	users: PropTypes.arrayOf(PropTypes.object).isRequired
 };
 
 export default UserList;

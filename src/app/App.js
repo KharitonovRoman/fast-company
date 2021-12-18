@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import UserList from "./components/userList";
 import SearchStatus from "./components/searchStatus";
-import api from "../api/index";
+import api from "../api";
 
 function App() {
 	const [users, setUsers] = useState(api.users.fetchAll());
@@ -12,10 +12,10 @@ function App() {
 		);
 	};
 
-	const handleToggleBookmark = (id) => {
+	const handleToggleBookmark = (userId) => {
 		setUsers((prevState) =>
 			prevState.map((user) => {
-				if (user._id === id) {
+				if (user._id === userId) {
 					user = { ...user };
 					user.isBookmarked = !user.isBookmarked;
 				}

@@ -8,7 +8,7 @@ import GroupList from "./groupList";
 import SearchStatus from "./searchStatus";
 import _ from "lodash";
 
-const Users = () => {
+const UsersList = () => {
 	const pageSize = 8;
 	const [currentPage, setCurrentPage] = useState(1);
 	const [professions, setProfessions] = useState();
@@ -43,7 +43,6 @@ const Users = () => {
 
 	useEffect(() => {
 		api.professions.fetchAll().then((data) => {
-			console.log(data);
 			setProfessions(data);
 		});
 	}, []);
@@ -125,8 +124,8 @@ const Users = () => {
 	return "Loading...";
 };
 
-Users.propTypes = {
+UsersList.propTypes = {
 	users: PropTypes.arrayOf(PropTypes.object)
 };
 
-export default Users;
+export default UsersList;

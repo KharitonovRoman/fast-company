@@ -1,22 +1,24 @@
 import { React, useEffect, useState } from "react";
-import userApi from "../../api";
+import userApi from "../../../../api";
 import PropTypes from "prop-types";
-import QualitiesList from "./qualitiesList";
+import Qualities from "../../ui/qualities";
 import { useHistory } from "react-router-dom";
 
-const User = ({ id }) => {
+const UserPage = ({ id }) => {
 	const [user, setUser] = useState();
 
 	useEffect(() => {
-		userApi.users.getById(id).then((data) => {
-			setUser(data);
-		});
+		userApi.users.getById(id).then((data) => setUser(data));
 	}, []);
 
 	const history = useHistory();
 
 	const handleGoToUserList = () => {
 		history.push("/users");
+	};
+
+	const handleGoToUserEdit = (userId) => {
+		history.push(`/users/${userId}/edit`);
 	};
 
 	if (user) {
@@ -26,15 +28,23 @@ const User = ({ id }) => {
 					<h2>{user.name}</h2>
 					<h4>{`Профессия: ${user.profession.name}`}</h4>
 					<p>{`Встретился, раз: ${user.completedMeetings}`}</p>
-					<QualitiesList qualities={user.qualities} />
+					<Qualities qualities={user.qualities} />
 					<h4>{`Rate: ${user.rate}`}</h4>
 					<button
-						className="btn btn-primary"
+						className="btn btn-outline-primary m-2"
 						onClick={() => {
 							handleGoToUserList();
 						}}
 					>
-						Все пользователи
+						Назад
+					</button>
+					<button
+						className="btn btn-primary m-2"
+						onClick={() => {
+							handleGoToUserEdit(user._id);
+						}}
+					>
+						Изменить
 					</button>
 				</>
 			)
@@ -44,8 +54,8 @@ const User = ({ id }) => {
 	return "Loading...";
 };
 
-User.propTypes = {
+UserPage.propTypes = {
 	id: PropTypes.string.isRequired
 };
 
-export default User;
+export default UserPage;

@@ -1,126 +1,131 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useHistory, useParams } from "react-router-dom";
 import { validator } from "../../utils/validator";
-import api from "../../../api/";
+import api from "../../../api";
 import TextField from "../common/form/textField";
 import SelectField from "../common/form/selectField";
 import RadioField from "../common/form/radioField";
-import MultiSelectField from "../common/form/multiSelect";
-import { useHistory } from "react-router-dom";
-import PropTypes from "prop-types";
+import MultiSelectField from "../common/form/multiSelectField";
 
-const UserForm = ({ user }) => {
-	console.log("user", user);
+const EditUserPage = () => {
+	const { userId } = useParams();
+	const history = useHistory();
+	const [isLoading, setIsLoading] = useState(false);
 	const [data, setData] = useState({
-		name: user.name,
-		email: user.email,
-		profession: user.profession._id,
-		sex: user.sex,
-		qualities: user.qualities.map((quality) => ({
-			label: quality.name,
-			value: quality._id
-		}))
+		name: "",
+		email: "",
+		profession: "",
+		sex: "male",
+		qualities: []
 	});
-	const [professions, setProfessions] = useState();
+	const [professions, setProfession] = useState([]);
 	const [qualities, setQualities] = useState({});
 	const [errors, setErrors] = useState({});
 
+	const getProfessionById = (id) => {
+		for (const prof in professions) {
+			const profData = professions[prof];
+			if (profData._id === id) return profData;
+		}
+	};
+	const getQualities = (elements) => {
+		const qualitiesArray = [];
+		for (const elem of elements) {
+			for (const quality in qualities) {
+				if (elem.value === qualities[quality]._id) {
+					qualitiesArray.push(qualities[quality]);
+				}
+			}
+		}
+		return qualitiesArray;
+	};
+	const handleSubmit = (e) => {
+		e.preventDefault();
+		const isValid = validate();
+		if (!isValid) return;
+		const { profession, qualities } = data;
+		api.users
+			.update(userId, {
+				...data,
+				profession: getProfessionById(profession),
+				qualities: getQualities(qualities)
+			})
+			.then((data) => history.push(`/users/${data._id}`));
+		console.log(data);
+	};
+	const transformData = (data) => {
+		return data.map((qual) => ({ label: qual.name, value: qual._id }));
+	};
 	useEffect(() => {
-		api.professions.fetchAll().then((data) => setProfessions(data));
+		setIsLoading(true);
+		api.users.getById(userId).then(({ profession, qualities, ...data }) =>
+			setData((prevState) => ({
+				...prevState,
+				...data,
+				qualities: transformData(qualities),
+				profession: profession._id
+			}))
+		);
 		api.qualities.fetchAll().then((data) => setQualities(data));
+		api.professions.fetchAll().then((data) => setProfession(data));
 	}, []);
+	useEffect(() => {
+		if (data._id) setIsLoading(false);
+	}, [data]);
 
+	const validatorConfig = {
+		email: {
+			isRequired: {
+				message: "Электронная почта обязательна для заполнения"
+			},
+			isEmail: {
+				message: "Email введен некорректно"
+			}
+		},
+		name: {
+			isRequired: {
+				message: "Введите ваше имя"
+			}
+		}
+	};
+	useEffect(() => validate(), [data]);
 	const handleChange = (target) => {
 		setData((prevState) => ({
 			...prevState,
 			[target.name]: target.value
 		}));
 	};
-
-	const validatorConfig = {
-		/* profession: {
-			isRequired: {
-				message: "Профессия обязательна для заполнения"
-			}
-		} */
-	};
-
-	useEffect(() => {
-		validate();
-	}, [data]);
-
 	const validate = () => {
 		const errors = validator(data, validatorConfig);
-		console.log("errors", errors);
 		setErrors(errors);
-
 		return Object.keys(errors).length === 0;
 	};
-
 	const isValid = Object.keys(errors).length === 0;
-
-	const handleSubmit = (e) => {
-		e.preventDefault();
-		const isValid = validate();
-		if (!isValid) {
-			return;
-		}
-		console.log(data);
-	};
-
-	const history = useHistory();
-
-	const updateUser = (userId, data) => {
-		data = {
-			...data,
-			profession: {
-				_id: data.profession,
-				name: professions.find(
-					(profession) => profession._id === data.profession
-				).name
-			},
-			qualities: data.qualities.map((userQuality) => ({
-				_id: userQuality.value,
-				name: userQuality.label,
-				color: qualities[
-					Object.keys(qualities).find(
-						(quality) =>
-							qualities[quality]._id === userQuality.value
-					)
-				].color
-			}))
-		};
-		api.users.update(userId, data);
-		history.push(`/users/${userId}`);
-	};
-
-	return (
+	return !isLoading && Object.keys(professions).length > 0 ? (
 		<form onSubmit={handleSubmit}>
 			<TextField
 				label="Имя"
 				name="name"
 				value={data.name}
-				error={errors.name}
 				onChange={handleChange}
+				error={errors.name}
 			/>
-
 			<TextField
 				label="Электронная почта"
 				name="email"
 				value={data.email}
-				error={errors.email}
 				onChange={handleChange}
+				error={errors.email}
 			/>
-
 			<SelectField
-				label="Профессия"
+				label="Выбери свою профессию"
 				defaultOption="Choose..."
-				name="profession"
 				options={professions}
+				name="profession"
+				onChange={handleChange}
 				value={data.profession}
 				error={errors.profession}
-				onChange={handleChange}
 			/>
-
 			<RadioField
 				options={[
 					{ name: "Male", value: "male" },
@@ -132,29 +137,24 @@ const UserForm = ({ user }) => {
 				onChange={handleChange}
 				label="Выберите ваш пол"
 			/>
-
 			<MultiSelectField
-				label="Качества"
-				name="qualities"
-				options={qualities}
 				defaultValue={data.qualities}
+				options={qualities}
 				onChange={handleChange}
+				name="qualities"
+				label="Выберите ваши качества"
 			/>
-
 			<button
 				type="submit"
 				disabled={!isValid}
 				className="btn btn-primary w-100 mx-auto"
-				onClick={() => updateUser(user._id, data)}
 			>
-				Сохранить
+				Обновить
 			</button>
 		</form>
+	) : (
+		"Loading..."
 	);
 };
 
-UserForm.propTypes = {
-	user: PropTypes.object
-};
-
-export default UserForm;
+export default EditUserPage;
